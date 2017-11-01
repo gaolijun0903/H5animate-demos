@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+<div class="time"></div>
+<div class="time"></div>
+<script src='jquery-2.2.3.min.js'></script>
+<script>
+(function ($) {
+    $.fn.showTime=function(optains){
+	    if(this.length==0){
+	        return;
+	    }else{
+	        this.each(function(){
+		        var defaults={
+		            sTime:"",
+		            eTime:"",
+		            callback:function(){
+			            return false;
+			        }
+		        },
+				_et=null,
+				_st=null,
+				_cDate=null,
+				_eDate=null,
+				_lT=null,
+				_elT=null,
+				_this=$(this),
+				_text=_this,
+				timeout=null,
+				_ct=new Date(),  //当前日期
+				starDateFun=function(str){
+					//console.log(str)
+					var reg=/^(\d{4})(-|\/)(\d{1,2})\2(\d{1,2}) (\d{1,2}):(\d{1,2}):(\d{1,2})$/,
+					rs=str.match(reg);
+
+					if(rs==null){return false;}
+					var date=new Date(rs[1],rs[3]-1,rs[4],rs[5],rs[6],rs[7]);
+
+					return(date.getFullYear()==rs[1] && date.getMonth()==rs[3]-1 &&date.getDate()==rs[4] && date.getHours()==rs[5] && date.getMinutes()==rs[6] && date.getSeconds()==rs[7])
+				},
+				getTime=function(){
+					if(_lT==null){
+						_elT=_eDate-_cDate;
+
+						if(_elT<0){
+						_text.html("活动已经结束");
+						}
+						_lT=_elT/1000;
+					}
+					if(_lT>=0){
+						var _day=Math.floor(_lT/86400),
+						_hours=Math.floor(_lT%86400/3600),
+						_minute=Math.floor((_lT-_day*86400-_hours*3600)/60),
+						_second=(_lT-_day*86400)%60;
+						//console.log(_hours+"  "+_minute+"   "+_second);
+
+						if(_hours<10){
+						_hours="0"+_hours;
+						}
+						if(_minute<10){
+						_minute="0"+_minute;
+						}
+						if(_second<10){
+						_second="0"+_second;
+						}
+						_text.html(_hours+':'+_minute+':'+_second);
+						_lT--;
+					}else{
+						clearInterval(timeout);
+						if(opts.callback && $.isFunction(opts.callback)){
+							opts.callback.call(_this);
+						}
+					}
+
+				};
+				                                                    
+
+				var opts=$.extend({},defaults,optains||{});
+				_et=opts.eTime;
+				if(!starDateFun(_et)){
+					alert("时间格式传入错误");
+					return
+				}
+				if(opts.sTime){  //开始时间
+					_ct=opts.sTime;
+				}
+
+				_cDate=new Date(_ct.toString()); //开始时间  
+				_eDate=new Date(_et.toString());// 结束时间
+				timeout=setInterval(getTime,1000)  //调用计时器
+			})
+	    }
+    }
+})(jQuery);
+
+
+$(".time").showTime({
+    eTime:"2016/11/03 23:59:59",
+    callback:function(){
+        $('活动结束').appendTo(this);
+    }
+})
+</script>
+</body>
+</html>
